@@ -1,0 +1,13 @@
+<div class="modalConatiner">
+    <div class="modal">
+        <h2 mat-dialog-title>{{ isEdit ? 'Edit Product' : 'Add Product' }}</h2>
+        <form #productForm="ngForm" (ngSubmit)="onSubmit(productForm)">
+            <input matInput placeholder="Product Name" name="productName" ngModel required>
+            <input matInput placeholder="URL" name="url" ngModel required>
+          <button mat-raised-button color="primary" type="submit" [disabled]="!productForm.valid">{{ isEdit ? 'Update' : 'Add' }}</button>
+          <button mat-raised-button color="warn" *ngIf="isEdit" (click)="onRemove()">Remove</button>
+        </form>
+    </div>
+
+    
+</div>

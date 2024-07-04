@@ -1,0 +1,17 @@
+
+<div class="mainLogin">
+    <div class="login">
+        <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
+
+                    <mat-label>Login</mat-label>
+                <input matInput placeholder="Username" name="username" ngModel required>    
+
+              <input matInput  placeholder="Password" name="password" ngModel type="password" required>
+
+          
+            <button mat-raised-button color="primary" type="submit" [disabled]="!loginForm.valid">Login</button>
+          </form>
+          
+          <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    </div>
+</div>

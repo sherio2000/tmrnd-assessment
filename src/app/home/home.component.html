@@ -1,0 +1,45 @@
+<div class="table-wrapper" *ngIf="!loading">
+    <table mat-table [dataSource]="dataSource" class="fl-table">
+        
+        <!-- Product Name Column -->
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell *matHeaderCellDef style="color: black;"> Product Name </th>
+          <td mat-cell *matCellDef="let element">
+            <a (click)="goToDetails(element.id)" style="cursor: pointer;">{{element.productName}}</a>
+          </td>
+        </ng-container>
+        
+        <!-- URL Column -->
+        <ng-container matColumnDef="url">
+          <th style="color: black;" mat-header-cell *matHeaderCellDef> URL </th>
+          <td mat-cell *matCellDef="let element">
+            <a [href]="element.url" target="_blank">{{element.url}}</a>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef style="color: black;"> Actions </th>
+          <td mat-cell *matCellDef="let element">
+            <div class="action-buttons">
+                <button mat-icon-button color="primary" (click)="editProduct(element)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="removeProduct(element.id)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+    <mat-paginator [pageSize]="5"></mat-paginator>
+    <button mat-raised-button color="primary" (click)="addProduct()">Add Product</button>
+</div>
+<p *ngIf="!loading" style="text-align: center; color: antiquewhite;">Click on a product name to view details</p>
+
+<div class="loader-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+</div>
