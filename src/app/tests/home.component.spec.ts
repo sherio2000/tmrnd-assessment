@@ -50,6 +50,7 @@ describe('HomeComponent', () => {
     const initialLength = component.dataSource.data.length;
     component.addProduct();
     expect(component.dataSource.data.length).toBe(initialLength + 1); // Ensure the product is added
+    expect(component.dataSource.data).toContain({ id: '1', productName: 'New Product', url: 'https://example.com' });
     expect(snackBarSpy).toHaveBeenCalledWith('Product added successfully', 'Close', { duration: 3000 });
   });
 
