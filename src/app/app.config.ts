@@ -4,9 +4,12 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import {provideHttpClient, withFetch} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, provideHttpClient, withFetch} from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
+import { AuthInterceptor } from './auth-interceptor.service';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes), provideClientHydration(), provideAnimationsAsync(), provideHttpClient(withFetch()), CookieService]
+  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes), provideClientHydration(), provideAnimationsAsync(), provideHttpClient(withFetch())
+    , {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true}
+  ]
 };
