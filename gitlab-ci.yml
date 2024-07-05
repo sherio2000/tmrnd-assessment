@@ -1,0 +1,38 @@
+image: node:18-alpine
+
+services:
+  - docker:dind
+
+variables:
+  PROJECT_ID: golden-ripsaw-428519-v8
+  IMAGE: gcr.io/$PROJECT_ID/tmrnd-assessment
+
+stages:
+  - test
+  - build
+  - deploy
+
+before_script:
+  - apk update && apk add --no-cache chromium
+  - export CHROME_BIN=/usr/bin/chromium-browser
+  - export LIGHTHOUSE_CHROMIUM_PATH=$CHROME_BIN
+
+test:
+  stage: test
+  script:
+    - npm install
+    - npm run test -- --watch=false --browsers=ChromeHeadless
+
+build:
+  stage: build
+  script:
+    - docker build -t $IMAGE .
+    - docker push $IMAGE
+
+deploy:
+  stage: deploy
+  script:
+    - echo $GCLOUD_SERVICE_KEY | base64 --decode > key.json
+    - gcloud auth activate-service-account --key-file=key.json
+    - gcloud config set project $PROJECT_ID
+    - gcloud run deploy your-angular-app --image $IMAGE --platform managed --region us-central1 --allow-unauthenticated
