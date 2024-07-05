@@ -3,9 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
 import { DetailComponent } from './detail/detail.component';
-
-import { AuthGuard } from './auth.guard';
-import { AuthResolver } from './auth-resolver.service';
+import { AuthGuard } from './auth/auth.guard';
+import { AuthResolver } from './auth/auth-resolver.service';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },

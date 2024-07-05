@@ -63,12 +63,14 @@
     position: relative;
   }
 </style>
+<div style="display: flex; justify-content: end;" *ngIf="showLogoutButton">
+  <button mat-raised-button color="primary" (click)="logout()">Logout</button>
+</div>
 
 <main class="main">
-  <!-- Add your new content here -->
-  <router-outlet>
-  </router-outlet>
+  <router-outlet></router-outlet>
   <div *ngIf="loading$ | async" class="loading-overlay">
     <mat-spinner></mat-spinner>
   </div>
 </main>
+

@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { DetailComponent } from './detail.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
+import { DetailComponent } from '../detail/detail.component';
 
 describe('DetailComponent', () => {
   let component: DetailComponent;
@@ -8,9 +12,23 @@ describe('DetailComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DetailComponent]
-    })
-    .compileComponents();
+      imports: [
+        DetailComponent, // Import DetailComponent since it is standalone
+        HttpClientTestingModule,
+        RouterTestingModule,
+        BrowserAnimationsModule, // Import BrowserAnimationsModule
+      ],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of({
+              get: (key: string) => '123' // Mock the paramMap to return '123' for the 'id' parameter
+            })
+          }
+        },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DetailComponent);
     component = fixture.componentInstance;
