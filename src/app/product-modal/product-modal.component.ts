@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-product-modal',
@@ -13,19 +14,26 @@ import { MatInputModule } from '@angular/material/input';
   styleUrl: './product-modal.component.scss'
 })
 export class ProductModalComponent {
-  isEdit: boolean;
-
+  product: any = {
+    productName: '',
+    url: ''
+  };
   constructor(
     public dialogRef: MatDialogRef<ProductModalComponent>,
+    private snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    this.isEdit = data ? true : false;
+    if (data) {
+      this.product = { ...data };
+    }
   }
 
   onSubmit(form: NgForm) {
-    if (form.valid) {
-      this.dialogRef.close({ action: this.isEdit ? 'edit' : 'add', product: form.value });
+    if (!this.product.productName || !this.product.url) {
+      this.snackBar.open('All fields must be populated', 'Close', { duration: 3000 });
+      return;
     }
+    this.dialogRef.close({ action: this.data ? 'edit' : 'add', product: this.product });
   }
 
   onRemove() {

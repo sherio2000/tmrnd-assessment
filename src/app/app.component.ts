@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { LoadingService } from './loading.service';
+import { RecaptchaModule, RecaptchaFormsModule } from 'ng-recaptcha';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +17,9 @@ import { LoadingService } from './loading.service';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    CommonModule
+    CommonModule,
+    RecaptchaModule,
+    RecaptchaFormsModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

@@ -85,6 +85,7 @@ export class DetailComponent implements OnInit{
   }
 
   updateDateRange() {
+    console.log(this.startDate, this.endDate);
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
