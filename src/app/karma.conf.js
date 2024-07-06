@@ -25,6 +25,10 @@ module.exports = function (config) {
       colors: true,
       logLevel: config.LOG_INFO,
       autoWatch: true,
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      },
       browsers: ['Chrome'],
       singleRun: false,
       restartOnFileChange: true
