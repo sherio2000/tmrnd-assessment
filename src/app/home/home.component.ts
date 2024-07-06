@@ -1,7 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProductModalComponent } from '../product-modal/product-modal.component';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,54 +10,57 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
+import { ToastrModule, ToastrService } from 'ngx-toastr';
+import { ProductService } from './product.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
-    MatInputModule, 
-    MatFormFieldModule, 
-    FormsModule, 
-    MatTableModule, 
-    MatIconModule, 
-    MatPaginatorModule, 
-    MatProgressSpinnerModule, 
-    CommonModule
+    MatInputModule,
+    MatFormFieldModule,
+    FormsModule,
+    MatTableModule,
+    MatIconModule,
+    MatPaginatorModule,
+    MatProgressSpinnerModule,
+    CommonModule,
+    ToastrModule
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['productName', 'url', 'actions'];
   dataSource = new MatTableDataSource<any>([]);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   loading: boolean = false;
 
-  constructor(private http: HttpClient, public dialog: MatDialog, private snackBar: MatSnackBar, private router: Router) {}
+  constructor(
+    private dialog: MatDialog,
+    private router: Router,
+    private toastr: ToastrService,
+    private productService: ProductService
+  ) {}
 
   ngOnInit() {
-    this.loadProductsFromStorage();
+    this.productService.products$.subscribe(products => {
+      this.dataSource.data = products;
+      this.dataSource.paginator = this.paginator;
+      if (products.length === 0) {
+        this.toastr.info('No products available. Refresh the page and make sure the table is empty', 'Info', { timeOut: 6000 });
+      }
+    });
+  }
+
+  ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
 
   fetchProducts() {
     this.loading = true;
-    const token = this.getToken();
-    this.http.get<any[]>('https://intermediate-test-v-2-web-test.apps.ocp.tmrnd.com.my/api/data/productList', {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe(data => {
-      console.log(data);
-      this.dataSource.data = data;
-      this.saveProductsToStorage(data);
-      this.loading = false;
-    }, error => {
-      console.error('Error fetching product list', error);
-      this.loading = false;
-    });
-  }
-
-  getToken() {
-    return localStorage.getItem('token');
+    this.productService.fetchProducts();
+    this.loading = false;
   }
 
   addProduct() {
@@ -70,16 +71,10 @@ export class HomeComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log(result.product.productName)
         if (!result.product.productName || !result.product.url) {
-
-          this.snackBar.open('All fields must be populated', 'Close', { duration: 3000 });
-        }else {
-
-          const updatedData = [...this.dataSource.data, result.product];
-          this.dataSource.data = updatedData;
-          this.saveProductsToStorage(updatedData);
-          this.snackBar.open('Product added successfully', 'Close', { duration: 3000 });
+          this.toastr.error('Please Fill All Fields', 'Sorry', { timeOut: 3000 });
+        } else {
+          this.productService.addProduct(result.product);
         }
       }
     });
@@ -93,44 +88,16 @@ export class HomeComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        const updatedData = this.dataSource.data.map(item => {
-          if (item.id === result.product.id) {
-            return {
-              ...item,
-              productName: result.product.productName || item.productName,
-              url: result.product.url || item.url
-            };
-          }
-          return item;
-        });
-        this.dataSource.data = updatedData;
-        this.saveProductsToStorage(updatedData);
-        this.snackBar.open('Product edited successfully', 'Close', { duration: 3000 });
+        this.productService.editProduct(result.product);
       }
     });
   }
 
   removeProduct(id: string) {
-    const updatedData = this.dataSource.data.filter(product => product.id !== id);
-    this.dataSource.data = updatedData;
-    this.saveProductsToStorage(updatedData);
-    this.snackBar.open('Product removed successfully', 'Close', { duration: 3000 });
+    this.productService.removeProduct(id);
   }
 
   goToDetails(productId: string) {
     this.router.navigate(['/detail', productId]);
-  }
-
-  private saveProductsToStorage(products: any[]) {
-    localStorage.setItem('products', JSON.stringify(products));
-  }
-
-  private loadProductsFromStorage() {
-    const products = localStorage.getItem('products');
-    if (products) {
-      this.dataSource.data = JSON.parse(products);
-    } else {
-      this.fetchProducts();  // Fetch from server if no data in localStorage
-    }
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -11,40 +11,51 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { CommonModule } from '@angular/common';
-
+import { ToastrModule, ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-detail',
   standalone: true,
-  imports: [MatTableModule, MatPaginatorModule, MatFormFieldModule, MatInputModule, MatIconModule, FormsModule, MatDatepickerModule, MatNativeDateModule, MatProgressSpinnerModule, CommonModule],
+  imports: [
+    MatTableModule, MatPaginatorModule, MatFormFieldModule, MatInputModule, 
+    MatIconModule, FormsModule, MatDatepickerModule, MatNativeDateModule, 
+    MatProgressSpinnerModule, CommonModule
+  ],
   templateUrl: './detail.component.html',
-  styleUrl: './detail.component.scss'
+  styleUrls: ['./detail.component.scss']
 })
-export class DetailComponent implements OnInit{
+export class DetailComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
-    'id', 'title', 'status', 'remark', 'dateTimeString', 
+    'id', 'title', 'status', 'remark', 'dateTimeString',
     'durationString', 'address'
   ];
   dataSource = new MatTableDataSource<any>([]);
   total: number = 0;
   pageSize: number = 5;
+  pageIndex: number = 0;  // Track the current page index
   startDate: Date = new Date(new Date().setDate(new Date().getDate() - 1));
   endDate: Date = new Date();
   token: string | null = localStorage.getItem('token');
   loading: boolean = false;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) { }
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  constructor(private route: ActivatedRoute, private http: HttpClient, private toastr: ToastrService) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
-        this.fetchData(id,  0, this.pageSize);
+        this.fetchData(id, this.pageIndex, this.pageSize);
       }
     });
   }
 
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+  }
 
+  // Fetch data from server
   fetchData(id: string, pageIndex: number, pageSize: number) {
     this.loading = true;
     const token = this.getToken();
@@ -63,34 +74,52 @@ export class DetailComponent implements OnInit{
       console.log(response);
       this.dataSource.data = response.data;
       this.total = response.total;
+      if (this.paginator) {
+        this.paginator.length = response.total; // Ensure paginator is defined before setting length
+      }
       this.loading = false;
     }, error => {
       console.error('Error fetching alert list', error);
+      this.toastr.error('Error fetching data', 'Error', { timeOut: 3000 });
       this.loading = false;
     });
   }
 
-
+  // Get token
   getToken() {
     return localStorage.getItem('token');
   }
 
+  // Pagination
   pageEvent(event: PageEvent) {
-    this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.fetchData(id, event.pageIndex, event.pageSize);
-      }
-    });
+    this.pageIndex = event.pageIndex;
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.fetchData(id, event.pageIndex, event.pageSize);
+    }
   }
 
+  // Update date range
   updateDateRange() {
     console.log(this.startDate, this.endDate);
-    this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.fetchData(id, 0, this.pageSize);
-      }
-    });
+
+    const validStartDate = new Date('2022-01-25');
+    const validEndDate = new Date('2022-02-16');
+
+    if (
+      this.startDate < validStartDate ||
+      this.startDate > validEndDate ||
+      this.endDate < validStartDate ||
+      this.endDate > validEndDate
+    ) {
+      this.toastr.info('Please select dates between 25th January 2022 and 16th February 2022.', 'Info', { timeOut: 3000 });
+    }
+
+    // Fetch data from server
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.pageIndex = 0;  // Reset to first page on date range change
+      this.fetchData(id, this.pageIndex, this.pageSize);
+    }
   }
 }

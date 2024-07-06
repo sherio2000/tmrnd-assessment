@@ -13,10 +13,13 @@ RUN npm run build --prod
 # Stage 2: Serve the Angular application with Nginx
 FROM nginx:alpine
 
-COPY --from=build /app/dist/tmrnd-assessment /usr/share/nginx/html
+# Remove the default Nginx configuration file
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Copy the Nginx configuration file
+# Copy the custom Nginx configuration file to the conf.d directory
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=build /app/dist/tmrnd-assessment/browser /usr/share/nginx/html
 
 EXPOSE 8080
 

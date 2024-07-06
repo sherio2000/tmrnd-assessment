@@ -5,6 +5,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { DetailComponent } from '../detail/detail.component';
+import { ToastrModule, ToastrService } from 'ngx-toastr';
 
 describe('DetailComponent', () => {
   let component: DetailComponent;
@@ -17,10 +18,12 @@ describe('DetailComponent', () => {
         HttpClientTestingModule,
         RouterTestingModule,
         BrowserAnimationsModule, // Import BrowserAnimationsModule
+        ToastrModule.forRoot()
       ],
       providers: [
         {
           provide: ActivatedRoute,
+          ToastrService,
           useValue: {
             paramMap: of({
               get: (key: string) => '123' // Mock the paramMap to return '123' for the 'id' parameter

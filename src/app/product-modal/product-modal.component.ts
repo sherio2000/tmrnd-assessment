@@ -5,6 +5,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-product-modal',
@@ -21,7 +23,8 @@ export class ProductModalComponent {
   constructor(
     public dialogRef: MatDialogRef<ProductModalComponent>,
     private snackBar: MatSnackBar,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private toastr: ToastrService
   ) {
     if (data) {
       this.product = { ...data };
@@ -30,7 +33,7 @@ export class ProductModalComponent {
 
   onSubmit(form: NgForm) {
     if (!this.product.productName || !this.product.url) {
-      this.snackBar.open('All fields must be populated', 'Close', { duration: 3000 });
+      this.toastr.error('All fields must be populated', 'Error', { timeOut: 3000 });
       return;
     }
     this.dialogRef.close({ action: this.data ? 'edit' : 'add', product: this.product });

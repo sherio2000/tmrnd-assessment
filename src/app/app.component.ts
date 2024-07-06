@@ -6,6 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { LoadingService } from './loading.service';
 import { TokenService } from './auth/token.service';
+import { ToastrModule } from 'ngx-toastr';
 
 @Component({
   selector: 'app-root',
